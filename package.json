@@ -1,0 +1,14 @@
+{
+  "name": "ios-no-texttrack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "serve": "parcel ./index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "parcel": "^2.8.0"
+  }
+}

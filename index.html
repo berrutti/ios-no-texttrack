@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio and Video Stream</title>
+  </head>
+  <body>
+    <video id="my-player" controls playsinline controlsList="nodownload" />
+
+    <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+    <script>
+      window.player = videojs("my-player", {
+        html5: {
+          nativeTextTracks: false,
+          vhs: {
+            maxPlaylistRetries: 15,
+          },
+        },
+      });
+      window.player.ready(() => {
+        player.src([
+          {
+            src: "https://wbc-live-cdn.edge-cdn.net/mi-webcast-origin/ngrp:63726090f88b23088e6b8d84_en_all/master.m3u8",
+            type: "application/vnd.apple.mpegurl",
+          },
+        ]);
+
+        const printCueData = (cues) => {
+          Array.from(cues).forEach((cue) => {
+            if ("value" in cue && cue?.value?.data) {
+              const value = new TextDecoder()
+                .decode(cue.value.data)
+                .replace("\x03", "")
+                .replace("\x00", "");
+              console.log({
+                value,
+                start: cue.startTime,
+                end: cue.endTime,
+              });
+            }
+          });
+        };
+
+        const onAddTrack = ({ track }) => {
+          console.log("On add track called");
+          if (
+            !(track?.kind === "metadata" && track.label === "Timed Metadata")
+          ) {
+            return;
+          }
+
+          const onCueChange = () => {
+            if (!track.activeCues) {
+              return;
+            }
+
+            const cues = printCueData(track.activeCues);
+          };
+
+          track.mode = "hidden";
+          track.addEventListener("cuechange", onCueChange);
+        };
+
+        player.textTracks().addEventListener("addtrack", onAddTrack);
+      });
+    </script>
+  </body>
+</html>
